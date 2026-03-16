@@ -1,0 +1,77 @@
+{
+  "id": "wishlist",
+  "title": "Wishlist",
+  "type": "endpoints",
+  "showInNav": true,
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/wishlist",
+      "requiresAuth": true,
+      "title": "Get Wishlist",
+      "description": "Retrieve the current user's wishlist with populated product details.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "response": {
+        "message": "Wishlist fetched successfully",
+        "wishlist": {
+          "id": "string",
+          "user": "string",
+          "products": [
+            {
+              "id": "string",
+              "name": "string",
+              "price": "number",
+              "description": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/wishlist",
+      "requiresAuth": true,
+      "title": "Add to Wishlist",
+      "description": "Add a product to the authenticated user's wishlist.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "requestBody": {
+        "productId": "string (Product ID)"
+      },
+      "response": {
+        "message": "Product added to wishlist",
+        "wishlist": {
+          "id": "string",
+          "products": [
+            "string (Product ID)"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/wishlist/:productId",
+      "requiresAuth": true,
+      "title": "Remove from Wishlist",
+      "description": "Remove a specific product from the authenticated user's wishlist.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "pathParams": {
+        "productId": "string (Product ID to remove)"
+      },
+      "response": {
+        "message": "Product removed from wishlist",
+        "wishlist": {
+          "id": "string",
+          "products": [
+            "string (Remaining Product IDs)"
+          ]
+        }
+      }
+    }
+  ]
+}

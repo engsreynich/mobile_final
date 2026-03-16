@@ -1,0 +1,129 @@
+{
+  "id": "cart",
+  "title": "Cart",
+  "type": "endpoints",
+  "showInNav": true,
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/cart",
+      "requiresAuth": true,
+      "title": "Add Item to Cart",
+      "description": "Add a product to the cart or increase quantity if it already exists.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "requestBody": {
+        "items": [
+          {
+            "product": "string (product ID)",
+            "quantity": "number"
+          }
+        ]
+      },
+      "response": {
+        "message": "Cart updated",
+        "cart": {
+          "id": "string",
+          "user": "string",
+          "items": [
+            {
+              "product": "string",
+              "quantity": "number"
+            }
+          ],
+          "createdAt": "ISODate",
+          "updatedAt": "ISODate"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "requiresAuth": true,
+      "title": "Get User's Cart",
+      "description": "Retrieve the authenticated user's cart.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "response": {
+        "cart": {
+          "id": "string",
+          "user": "string",
+          "items": [
+            {
+              "product": {
+                "id": "string",
+                "name": "string",
+                "price": "number"
+              },
+              "quantity": "number"
+            }
+          ],
+          "createdAt": "ISODate",
+          "updatedAt": "ISODate"
+        }
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/cart/items/:itemId",
+      "requiresAuth": true,
+      "title": "Update Cart Item Quantity",
+      "description": "Update the quantity of a specific item in the cart.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "requestBody": {
+        "quantity": "number"
+      },
+      "response": {
+        "message": "Quantity updated successfully",
+        "cart": {
+          "id": "string",
+          "items": [
+            {
+              "product": "string",
+              "quantity": "number"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/cart",
+      "requiresAuth": true,
+      "title": "Delete Entire Cart",
+      "description": "Delete the entire cart of the current user.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "response": {
+        "message": "Cart deleted successfully"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/cart/items/:itemId",
+      "requiresAuth": true,
+      "title": "Remove Item from Cart",
+      "description": "Remove a specific item from the authenticated user's cart.",
+      "headers": {
+        "Authorization": "Bearer <token>"
+      },
+      "response": {
+        "message": "Item removed successfully",
+        "cart": {
+          "id": "string",
+          "items": [
+            {
+              "product": "string",
+              "quantity": "number"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
