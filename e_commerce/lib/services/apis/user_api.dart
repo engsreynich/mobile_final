@@ -5,15 +5,13 @@ import 'package:e_commerce/core/constant.dart';
 import 'package:e_commerce/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:jwt_decoder/jwt_decoder.dart';
-
-import '../locals/shared_pres_service.dart';
+import '../locals/auth_storage.dart';
 
 final userApiProvider = Provider((ref) => UserApi());
 
 class UserApi {
   Future<String?> _getToken() async {
-    return await SharedPresService.getToken();
+    return await AuthStorage.getToken();
   }
 
   Future<User?> fetchUser() async {
@@ -25,14 +23,7 @@ class UserApi {
         return null;
       }
 
-      final userId = JwtDecoder.decode(token)['id'];
-
-      if (userId == null) {
-        log("Invalid token, no userId found");
-        return null;
-      }
-
-      final url = Uri.parse("${ConstantApp.baseUrl}/api/users/$userId");
+      final url = Uri.parse("${ConstantApp.baseUrl}/api/users/profile");
 
       final response = await http.get(
         url,

@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../../core/constant.dart';
-import '../locals/shared_pres_service.dart';
+import '../locals/auth_storage.dart';
 
 final wishlistApiProvider = Provider((ref) => WishlistApi());
 
 class WishlistApi {
   Future<String?> _getToken() async {
-    return await SharedPresService.getToken();
+    return await AuthStorage.getToken();
   }
 
   static Map<String, String> _headers(String token) {

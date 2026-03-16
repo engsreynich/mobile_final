@@ -1,122 +1,141 @@
 import 'dart:convert';
-import 'dart:developer';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/constant.dart';
+import 'package:e_commerce/core/constant.dart';
+import 'package:http/http.dart' as http;
 import '../../models/cart.dart';
 import '../../models/cart_item.dart';
-import 'package:http/http.dart' as http;
+import 'auth_api.dart';
 
-import '../locals/shared_pres_service.dart';
-final cartApiProvider = Provider<CartApi>((ref) {
-  return CartApi();
-});
 class CartApi {
-  Future<String?> _getToken() async {
-    return await SharedPresService.getToken();
-  }
+  final String baseUrl = ConstantApp.baseUrl;
+  final AuthApi _authApi = AuthApi();
 
-  Future<void> addToCart(CartItem item) async {
-    final token = await _getToken();
-    final url = Uri.parse("${ConstantApp.baseUrl}/api/carts");
-
-    final requestBody = {
-      'items': [
-        {'product': item.product.id, 'quantity': item.quantity}
-      ]
+  Future<Map<String, String>> _getHeaders() async {
+    final token = await _authApi.getToken();
+    
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
     };
-
-    if (token == null) {
-      log('No token available');
-      return;
-    }
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'authorization': 'Bearer $token',
-      },
-      body: jsonEncode(requestBody),
-    );
-
-    if (response.statusCode == 201) {
-      log('Item added to cart');
-    } else {
-      final jsonResponse = jsonDecode(response.body);
-      final error = jsonResponse['message'] ?? jsonResponse['error'];
-      log('Failed to add item to cart: $error');
-    }
   }
 
   Future<Cart> fetchCart() async {
-    final token = await _getToken();
-    if (token == null) {
-      throw Exception('No token available');
-    }
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl/api/carts';
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: headers,
+      );
 
-    final response = await http.get(
-      Uri.parse('${ConstantApp.baseUrl}/api/carts'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+    
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      return Cart.fromJson(jsonResponse);
-    } else {
-      throw Exception('Failed to load cart');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return Cart.fromJson(jsonResponse);
+      } else if (response.statusCode == 404) {
+        return Cart(id: '', userId: '', items: []);
+      } else {
+        throw Exception('Failed to fetch cart: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching cart: $e');
     }
   }
 
-  Future<void> updateQuantity(
-      int quantity, String cartId, String itemId) async {
-    final token = await _getToken();
-    if (token == null) {
-      log('No token available');
-      return;
-    }
+  Future<void> addToCart(CartItem item) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl/api/carts';
+    
+      
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: json.encode({
+          'items': [
+            {
+              'product': item.product.id,
+              'quantity': item.quantity,
+            }
+          ]
+        }),
+      );
 
-    final url =
-        Uri.parse("${ConstantApp.baseUrl}/api/carts/$cartId/items/$itemId");
-    await http.patch(
-      url,
-      headers: {
-        'authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'quantity': quantity}),
-    );
+    
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception('Failed to add to cart: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error adding to cart: $e');
+    }
+  }
+
+  Future<void> updateQuantity(int quantity, String cartId, String itemId) async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl/api/carts/items/$itemId'; 
+  
+      
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: headers,
+        body: json.encode({
+          'quantity': quantity,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception('Failed to update quantity: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error updating quantity: $e');
+    }
   }
 
   Future<void> deleteCartItems(String cartId, String itemId) async {
-    final token = await _getToken();
-    if (token == null) {
-      log('No token available');
-      return;
-    }
-
-    final url =
-        Uri.parse("${ConstantApp.baseUrl}/api/carts/$cartId/Items/$itemId");
-
     try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl/api/carts/items/$itemId'; 
+      
+      
       final response = await http.delete(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'authorization': 'Bearer $token',
-        },
+        Uri.parse(url),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        log(jsonResponse['message'] ?? 'Cart item removed successfully');
+        return;
       } else {
-        final jsonResponse = jsonDecode(response.body);
-        log('Failed to delete cart item: ${jsonResponse['message'] ?? 'Unknown error'}');
+        throw Exception('Failed to delete item: ${response.statusCode}');
       }
     } catch (e) {
-      log('Error during cart item deletion: $e');
+      throw Exception('Error deleting item: $e');
+    }
+  }
+
+  Future<void> clearCart() async {
+    try {
+      final headers = await _getHeaders();
+      final url = '$baseUrl/api/carts'; 
+      
+      
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception('Failed to clear cart: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error clearing cart: $e');
     }
   }
 }

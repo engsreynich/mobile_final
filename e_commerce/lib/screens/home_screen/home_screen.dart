@@ -1,4 +1,3 @@
-import 'dart:developer';
 import '../../providers/cart_notifier.dart';
 import '../../providers/category_notifier.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import '../../providers/product_notifier.dart';
-import '../../services/locals/shared_pres_service.dart';
+import '../../services/locals/auth_storage.dart';
 import '../../widgets/product_card.dart';
-import '../auth/is_auth.dart';
-import '../cart/my_cart_screen.dart';
+import '../auth_screen/is_auth.dart';
+import '../cart_screen/my_cart_screen.dart';
 import '../product_detail.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -24,6 +23,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<PageStorageKey> _scrollKeys = [];
   final AutoScrollController _scrollController = AutoScrollController();
   final Map<int, GlobalKey> _itemKeys = {};
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
@@ -61,31 +61,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final totalCart = ref.watch(cartStateNotifierProvider).items.length;
+
     return Scaffold(
-      backgroundColor: Color(0xffFFFFFF),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Padding(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        title: const Padding(
           padding: EdgeInsets.only(right: 20),
           child: Text("Discover"),
         ),
         actions: [
           IconButton(
-              onPressed: () async {
-                await SharedPresService.clearToken();
-                if (!context.mounted) return;
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (ctx) => IsAuth()));
-              },
-              icon: Icon(Icons.logout)),
+            onPressed: () async {
+              await AuthStorage.clearToken();
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (ctx) => IsAuth()));
+            },
+            icon: const Icon(Icons.logout),
+          ),
           GestureDetector(
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (ctx) => MyCartScreen()));
             },
             child: Padding(
-              padding: EdgeInsets.only(right: 20, left: 20),
+              padding: const EdgeInsets.only(right: 20, left: 20),
               child: badges.Badge(
-                badgeStyle: badges.BadgeStyle(
+                badgeStyle: const badges.BadgeStyle(
                   shape: badges.BadgeShape.circle,
                   badgeColor: Colors.green,
                   padding: EdgeInsets.all(5),
@@ -93,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 badgeContent: Text(
                   totalCart.toString(),
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
                 position: badges.BadgePosition.topEnd(top: -10, end: -5),
                 showBadge: totalCart == 0 ? false : true,
@@ -102,9 +106,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   width: 35,
                   height: 35,
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade700),
-                      borderRadius: BorderRadius.circular(50)),
-                  child: Icon(Icons.shopping_basket),
+                    border: Border.all(color: Colors.grey.shade700),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: const Icon(Icons.shopping_basket),
                 ),
               ),
             ),
@@ -112,15 +117,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.only(right: 20, left: 20),
-        child: Column(
-          spacing: 25,
-          children: [
-            _buildSearch(),
-            _buildBanner(),
-            _buildheaderCatories(),
-            _buildCategoriesItems(),
-            _buildProductCarts()
+        padding: const EdgeInsets.only(right: 20, left: 20),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: _buildSearch(),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 25),
+            ),
+
+            SliverToBoxAdapter(
+              child: _buildBanner(),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 25),
+            ),
+
+            SliverToBoxAdapter(
+              child: _buildheaderCatories(),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 15),
+            ),
+
+            SliverToBoxAdapter(
+              child: _buildCategoriesItems(),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 20),
+            ),
+
+            _buildProductCarts(),
           ],
         ),
       ),
@@ -136,25 +164,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final RenderBox box = keyContext.findRenderObject() as RenderBox;
         final itemPosition = box.localToGlobal(Offset.zero).dx;
         final itemWidth = box.size.width;
-
-        // Calculate target offset to center the selected item
         final targetOffset = _scrollController.offset +
             itemPosition -
             (screenWidth / 2) +
             (itemWidth / 2);
-
-        // Ensure the calculated offset is within valid bounds
         final minScrollExtent = _scrollController.position.minScrollExtent;
         final maxScrollExtent = _scrollController.position.maxScrollExtent;
         final boundedOffset =
             targetOffset.clamp(minScrollExtent, maxScrollExtent);
         _scrollController.animateTo(
           boundedOffset,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
-      } else {
-        log("keyContext for index $index is null.");
       }
     });
   }
@@ -163,63 +185,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final productState = ref.watch(productStateNotifierProvider);
     final selectedCategoryIndex = ref.watch(selectedCategoryProvider);
     final categories = ref.watch(categoryNotifierProvider).categories;
+
     if (categories.isEmpty) {
-      return Expanded(
+      return const SliverFillRemaining(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    while (_scrollKeys.length <= selectedCategoryIndex) {
+      _scrollKeys.add(PageStorageKey(selectedCategoryIndex));
+    }
+
+    if (productState.isLoading) {
+      return const SliverFillRemaining(
         child: Center(
           child: CircularProgressIndicator(),
         ),
       );
     }
 
-    final selectedCategory = categories[selectedCategoryIndex];
-    while (_scrollKeys.length <= selectedCategoryIndex) {
-      _scrollKeys.add(PageStorageKey(selectedCategoryIndex));
+    if (productState.products.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Text(
+            "No products found for this category",
+            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
-    return Expanded(
-      child: productState.isLoading
-          ? Center(child: CircularProgressIndicator())
-          : productState.products.isEmpty
-              ? Center(
-                  child: Text(
-                    "No products found for this category",
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+
+    return SliverPadding(
+      padding: const EdgeInsets.only(bottom: 20),
+      sliver: SliverGrid(
+        key: _scrollKeys[selectedCategoryIndex],
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final product = productState.products[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => ProductDetail(product: product),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    if (selectedCategory.id == 'all') {
-                      await ref
-                          .read(productStateNotifierProvider.notifier)
-                          .fetchProducts();
-                    } else {
-                      await ref
-                          .read(productStateNotifierProvider.notifier)
-                          .fetchProductsByCategory(selectedCategory.id ?? '');
-                    }
-                  },
-                  child: GridView.builder(
-                    key: _scrollKeys[selectedCategoryIndex],
-                    itemCount: productState.products.length,
-                    padding: EdgeInsets.zero,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                    ),
-                    itemBuilder: (ctx, index) {
-                      final product = productState.products[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (ctx) {
-                            return ProductDetail(
-                              product: product,
-                            );
-                          }));
-                        },
-                        child: ProductCart(product: product),
-                      );
-                    },
-                  ),
-                ),
+                );
+              },
+              child: ProductCart(product: product),
+            );
+          },
+          childCount: productState.products.length,
+        ),
+      ),
     );
   }
 
@@ -228,7 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final selectedCategoryIndex = ref.watch(selectedCategoryProvider);
 
     return categoryState.isLoading
-        ? Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator())
         : SizedBox(
             height: 40,
             child: ListView.builder(
@@ -256,17 +281,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     }
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(left: 10),
+                    padding: const EdgeInsets.only(left: 10),
                     child: Container(
                       key: _itemKeys[index],
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         border: index != selectedCategoryIndex
                             ? Border.all(color: Colors.black)
-                            : Border(),
+                            : null,
                         borderRadius: BorderRadius.circular(10),
                         color: index == selectedCategoryIndex
-                            ? Color(0xff19C463)
+                            ? const Color(0xff19C463)
                             : Colors.transparent,
                       ),
                       child: Text(
@@ -289,13 +314,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        const Text(
           "Categories",
-          style: TextStyle(fontSize: 20),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         Text(
           "See all",
-          style: TextStyle(fontSize: 20, color: Colors.green),
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.green.shade600,
+            fontWeight: FontWeight.w500,
+          ),
         )
       ],
     );
@@ -307,7 +336,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Color(0xff19C463),
+        color: const Color(0xff19C463),
       ),
       child: Stack(
         clipBehavior: Clip.none,
@@ -318,7 +347,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Clearance",
                   style: TextStyle(
                     fontSize: 32,
@@ -326,7 +355,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     color: Colors.white,
                   ),
                 ),
-                Text(
+                const Text(
                   "Sales",
                   style: TextStyle(
                     fontSize: 32,
@@ -334,17 +363,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 10),
-                ElevatedButton.icon(
+                const SizedBox(height: 10),
+                ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xffFFFFFF)),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
                   onPressed: () {},
-                  label: Text(
+                  child: const Text(
                     "Up to 50%",
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 )
@@ -358,6 +395,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               "assets/images/iphone_banner.png",
               width: 210,
               height: 210,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 210,
+                  height: 210,
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.image_not_supported),
+                );
+              },
             ),
           ),
         ],
@@ -371,19 +416,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       height: 50,
       decoration: BoxDecoration(
           color: Colors.grey[200], borderRadius: BorderRadius.circular(10)),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 8.0),
+            padding: EdgeInsets.only(left: 16.0),
             child: Text(
-              "Search",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              "Search products...",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Icon(Icons.search),
+            padding: EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.search, color: Colors.grey),
           ),
         ],
       ),

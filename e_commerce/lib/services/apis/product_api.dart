@@ -6,13 +6,13 @@ import 'package:http/http.dart' as http;
 
 import '../../core/constant.dart';
 import '../../models/product_model.dart';
-import '../locals/shared_pres_service.dart';
+import '../locals/auth_storage.dart';
 
 final productApiProvider = Provider((ref) => ProductApi());
 
 class ProductApi {
   Future<String?> _getToken() async {
-    return await SharedPresService.getToken();
+    return await AuthStorage.getToken();
   }
   Future<List<Product>> fetchProductsByCategory(String categoryId) async{
     try {

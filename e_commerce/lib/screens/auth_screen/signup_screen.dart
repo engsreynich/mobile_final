@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/apis/auth_api.dart';
 import '../../utils/show_snackbar_utils.dart';
 import '../../widgets/custom_text_field.dart';
-import '../home/home_screen.dart';
+import '../home_screen/home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   final VoidCallback isLogin;
