@@ -24,6 +24,14 @@ const orderSchema = mongoose.Schema({
             },
         },
     ],
+    paymentMethod: {
+        type: String,
+        required: false,
+    },
+    notes: {
+        type: String,
+        required: false,
+    },
     totalAmount: {
         type: Number,
         required: true,
