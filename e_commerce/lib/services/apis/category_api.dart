@@ -6,14 +6,14 @@ import 'package:http/http.dart' as http;
 
 import '../../core/constant.dart';
 import '../../models/category_model.dart';
-import '../locals/shared_pres_service.dart';
+import '../locals/auth_storage.dart';
 
 final categoryApiProvider = Provider((ref) => CategoryApi());
 
 class CategoryApi {
   Future<List<CategoryModel>> fetchCategories() async {
     try {
-      final token = await SharedPresService.getToken();
+      final token = await AuthStorage.getToken();
 
       if (token == null) {
         log('No token available');

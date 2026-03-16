@@ -6,7 +6,7 @@ import 'package:e_commerce/providers/wishlist_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'cart/my_cart_screen.dart';
+import 'cart_screen/my_cart_screen.dart';
 
 class ProductDetail extends ConsumerStatefulWidget {
   final Product product;
@@ -17,7 +17,6 @@ class ProductDetail extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailState extends ConsumerState<ProductDetail> {
-
   final storages = ["1B", "825G", "512G"];
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<double> _scrollOffsetNotifier = ValueNotifier(0);
@@ -157,32 +156,16 @@ class _ProductDetailState extends ConsumerState<ProductDetail> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       child: Column(
+                        spacing: 10,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                widget.product.name!,
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              ElevatedButton.icon(
-                                  icon: Icon(
-                                    Icons.local_offer,
-                                    color: Colors.white,
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                      backgroundColor: Color(0xffEF4C4C)),
-                                  onPressed: () {},
-                                  label: Text(
-                                    "On Sale",
-                                    style: TextStyle(color: Colors.white),
-                                  ))
-                            ],
+                          Text(
+                            widget.product.name!,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
+                       
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -205,15 +188,12 @@ class _ProductDetailState extends ConsumerState<ProductDetail> {
                                   ),
                                 ],
                               ),
-                              IconButton(
-                                icon: Icon(Icons.favorite_border,
-                                    color: Colors.grey, size: 28),
-                                onPressed: () {},
-                              ),
+                             
                             ],
                           ),
                           Text(
-                            widget.product.description ?? "No description provided",
+                            widget.product.description ??
+                                "No description provided",
                             style: TextStyle(fontSize: 15),
                           ),
                           SizedBox(height: 25),

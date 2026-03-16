@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
 import '../../services/locals/onboarding_service.dart';
-import '../auth/is_auth.dart';
+import '../auth_screen/is_auth.dart';
 
 class OnBoardingPage extends StatefulWidget {
   const OnBoardingPage({super.key});

@@ -1,25 +1,25 @@
+import 'package:e_commerce/screens/cart_screen/my_cart_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../home/home_screen.dart';
-import '../profiles/profile_screen.dart';
-import '../search-screen/search_screen.dart';
-import '../wishlist_screen.dart';
+import '../home_screen/home_screen.dart';
+import '../profiles_screen/profile_screen.dart';
+import '../wishlist_screen/wishlist_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    SearchScreen(),
+     MyCartScreen(),
     WishListScreen(),
+   
     ProfileScreen(),
   ];
 
@@ -32,9 +32,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
         selectedItemColor: Colors.green,
         items: [
           BottomNavigationBarItem(
@@ -43,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             label: 'Home',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag,),label: "Cart"),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'WishList',

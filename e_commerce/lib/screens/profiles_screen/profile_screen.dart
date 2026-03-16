@@ -41,14 +41,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        
+        title: Text('Profile',style: TextStyle(
+          color: Colors.white,fontWeight: FontWeight.bold
+        ),),
         backgroundColor: Colors.teal,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {},
-          ),
-        ],
+       
       ),
       body: SingleChildScrollView(
         child: Padding(

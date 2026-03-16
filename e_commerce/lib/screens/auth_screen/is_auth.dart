@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/locals/shared_pres_service.dart';
+import '../../services/locals/auth_storage.dart';
 import '../main-scaffold/main_screen.dart';
 import 'auth_screen.dart';
 
@@ -20,7 +20,7 @@ class _IsAuthState extends State<IsAuth> {
   }
 
   Future<void> authState() async {
-    final result = await SharedPresService.getToken();
+    final result = await AuthStorage.getToken();
     setState(() {
       if (result != null) {
         _isLoggedIn = !_isLoggedIn;

@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce/providers/cart_notifier.dart';
+import 'package:e_commerce/screens/checkout/checkout_screen.dart';
+import 'package:e_commerce/screens/main-scaffold/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-
-import '../product-screen/all_product.dart';
 
 class MyCartScreen extends ConsumerStatefulWidget {
   const MyCartScreen({super.key});
@@ -48,28 +48,13 @@ class _MyCartScreenState extends ConsumerState<MyCartScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-            width: 10,
-            height: 10,
-            margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: .6),
-            ),
-            child: Icon(
-              Icons.arrow_back_ios,
-              size: 20,
-            ),
-          ),
-        ),
         title: Text(
           "My Cart",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
         actions: [
           Padding(
@@ -128,10 +113,12 @@ class _MyCartScreenState extends ConsumerState<MyCartScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(item.product.name!,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20)),
+                                      Expanded(
+                                        child: Text(item.product.name!,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18)),
+                                      ),
                                       GestureDetector(
                                           onTap: () {
                                             ref
@@ -252,7 +239,10 @@ class _MyCartScreenState extends ConsumerState<MyCartScreen> {
                               borderRadius: BorderRadius.circular(15)),
                           minimumSize: Size(double.infinity, 50),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => CheckoutScreen()));
+                        },
                         child: Text(
                           "CheckOut for \$${chargesList.last['value']}",
                           style: TextStyle(color: Colors.white),
@@ -281,27 +271,28 @@ class _MyCartScreenState extends ConsumerState<MyCartScreen> {
           SizedBox(height: 20),
           Text(
             "Your cart is empty",
-            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
+              color: Colors.black87,
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
           Text(
             "Looks like you haven't added anything to your cart yet.",
-            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              height: 1.5,
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 30),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (ctx) => AllProductScreen()));
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (ctx) => MainScreen()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal,
@@ -313,9 +304,9 @@ class _MyCartScreenState extends ConsumerState<MyCartScreen> {
             child: Text(
               "Explore Products",
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
           ),
         ],

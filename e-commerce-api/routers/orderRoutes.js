@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const Cart = require("../models/Cart");
 
 router.post("/place-order", async (req, res) => {
   try {
@@ -20,6 +21,7 @@ router.post("/place-order", async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
+    await Cart.deleteMany({ user: userId });
 
     res.status(201).json({
       message: "Order placed successfully",
@@ -29,7 +31,6 @@ router.post("/place-order", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 
 router.patch("/:orderId/update-location", async (req, res) => {

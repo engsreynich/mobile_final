@@ -20,23 +20,19 @@ router.post("/", authMiddleware, async (req, res) => {
     let cart = await Cart.findOne({ user: userId });
 
     if (cart) {
-      // Check if product already exists in the cart
       const productIndex = cart.items.findIndex(
         (item) => item.product.toString() === items[0].product
       );
 
       if (productIndex > -1) {
-        // Product exists, update quantity
         cart.items[productIndex].quantity += items[0].quantity;
       } else {
-        // Product doesn't exist, add new item
         cart.items.push({
           product: items[0].product,
           quantity: items[0].quantity,
         });
       }
     } else {
-      // Create new cart
       cart = new Cart({
         user: userId,
         items: [

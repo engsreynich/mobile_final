@@ -5,16 +5,19 @@ import 'package:e_commerce/core/constant.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-import '../locals/shared_pres_service.dart';
+import '../locals/auth_storage.dart';
 
 final authApi = Provider((ref) => AuthApi());
 
 class AuthApi {
-  static const _headers = {
+  static const _headers =
+   {
     "x-api-key": "my_super_secret_key",
     "Content-Type": "application/json",
   };
-
+Future<String?> getToken() async{
+  return await AuthStorage.getToken();
+}
   Future<bool> login(String email, String password) async {
     return _authenticate(email: email, password: password, endpoint: "login");
   }
@@ -53,7 +56,7 @@ class AuthApi {
         final token = jsonResponse['token'];
 
         if (token != null) {
-          await SharedPresService.setToken(token);
+          await AuthStorage.setToken(token);
           log('$endpoint successful');
           return true;
         } else {
